@@ -11,11 +11,18 @@ const progress = $('#progress')
 const nextBtn = $('.btn-next')
 const prevBtn = $('.btn-prev')
 const randomBtn = $('.btn-random')
+const repeatBtn = $('.btn-repeat')
+const playList = $('.playlist')
+
+const PLAYER_STORAGE_KEY = 'USER_PLAYER'
 
 const app = {
     currentIndex: 0,
     isRandom: false,
     isPlaying: false,
+    isRepeat: false,
+    isSongactive: false,
+    config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
     songs: [
         {
             name: 'Blueming',
@@ -78,10 +85,18 @@ const app = {
             image: './assets/img/img_twentythree.jpg',
         },
     ],
+    setConfig: function(key, value) {
+        this.config[key] = value;
+        localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config))
+    },
+    loadConfig: function() {
+        this.isRandom = this.config.isRandom
+        this.isRepeat = this.config.isRepeat
+    },
     render: function () {
-        const htmls = this.songs.map(songs => {
+        const htmls = this.songs.map((songs, index) => {
             return `
-                <div class="song">
+                <div class="song ${index === this.currentIndex ? 'active' : ''}" data-index="${index}">
                     <div class="thumb"
                         style="background-image: url('${songs.image}')">
                     </div>
@@ -152,9 +167,10 @@ const app = {
 
         // Khi tiến độ song thay đỗi
         audio.ontimeupdate = function () {
-            const progressPercent = Math.floor(audio.currentTime / audio.duration * 100)
-            progress.value = progressPercent 
-
+            if (audio.duration) {
+                const progressPercent = Math.floor(audio.currentTime / audio.duration * 100)
+                progress.value = progressPercent 
+            }
         }
 
         // khi tua song
@@ -171,6 +187,8 @@ const app = {
                 _this.nextSong()
             }
             audio.play()
+            _this.render()
+            _this.scrollToActiveSong()
         }
 
         // Khi previous song
@@ -181,12 +199,51 @@ const app = {
                 _this.prevSong()
             }
             audio.play()
+            _this.render()
+            _this.scrollToActiveSong()
         }
         
         // Xử lý bật/tắt Random song
         randomBtn.onclick = function () {
             _this.isRandom = !_this.isRandom
             randomBtn.classList.toggle('active', _this.isRandom)
+            _this.setConfig('isRandom', _this.isRandom)
+        }
+
+        // Xử lý bật/tắt repeat
+        repeatBtn.onclick = function () {
+            _this.isRepeat = !_this.isRepeat
+            repeatBtn.classList.toggle('active', _this.isRepeat)
+            _this.setConfig('isRepeat', _this.isRepeat)
+        }
+
+        // Xử lý khi ended song
+        audio.onended = function () {
+            if (_this.isRepeat) {
+                audio.play()
+            } else {
+                nextBtn.click()
+            }
+        }
+
+        // Lắng nghe click vào playlist
+        playList.onclick = function (e) {
+            const songNode = e.target.closest('.song:not(.active)');
+            const optionNode = e.target.closest('.option')
+            if ( songNode || optionNode) {
+                // xử lý click song
+                if (songNode) {
+                    _this.currentIndex = Number(songNode.dataset.index)
+                    _this.loadCurrentSong()
+                    _this.render()
+                    audio.play()
+                }
+
+                // Xử lý click option
+                if (e.target.closest('.option')) {
+
+                }
+            }
         }
     },
     loadCurrentSong: function () {
@@ -218,8 +275,26 @@ const app = {
         }
         this.loadCurrentSong()
     },
-    
+    scrollToActiveSong: function () {
+        setTimeout(() => {
+            if (this.currentIndex <= 3) {
+                $('.song.active').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                }) // Element.scrollIntoView()
+            } else {
+                $('.song.active').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                }) // Element.scrollIntoView()
+            }
+
+        }, 200)
+    },
     start: function () {
+        // Gán config lại vào ứng dụng
+        this.loadConfig()
+
         // Định nghĩa các thuộc tính
         this.defineProperties()
 
@@ -231,6 +306,10 @@ const app = {
 
         // Render danh sách bài hát
         this.render()
+
+        // hiển thiện trạng thái của repeat và random khi load lại trang
+        repeatBtn.classList.toggle('active', this.isRepeat)
+        randomBtn.classList.toggle('active', this.isRandom)
     },
 }
 app.start()

@@ -207,4 +207,10 @@ header h2 {
     max-width: 480px;
     margin: 0 auto;
   }
+
+  .footer {
+    color: #f5f5f5;
+    padding: 20px 0;
+  }
+  
 }
