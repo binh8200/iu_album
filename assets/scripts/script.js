@@ -95,15 +95,46 @@ const app = {
         localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config))
     },
     loadConfig: function() {
-        this.currentIndex = 0
-        this.isRandom = this.config.isRandom
-        this.isRepeat = this.config.isRepeat
-        this.isMute = this.config.isMute
-        this.currentVolume = this.config.currentVolume
-        this.currentIndex = this.config.currentIndex
+        //
+        if (this.config.isRandom == null) {
+            this.isRandom = false
+        } else {
+            this.isRandom = this.config.isRandom
+        }
+
+        //
+        if (this.config.isRepeat == null) {
+            this.isRepeat = false
+        } else {
+            this.isRepeat = this.config.isRepeat
+        }
+
+        //
+        if (this.config.isMute == null) {
+            this.isMute = false
+        } else if (this.config.currentVolume > 0) {
+            this.isMute = false
+        } else  if (this.config.currentVolume <= 0) {
+            this.isMute = true
+        } else {
+            this.isMute = this.config.isMute
+        }
+
+        //
+        if (this.config.currentVolume == null) {
+            this.currentVolume = 50
+        } else {
+            this.currentVolume = this.config.currentVolume
+        }
+
+        //
+        if (this.config.currentIndex == null) {
+            this.currentIndex = 0
+        } else {
+            this.currentIndex = this.config.currentIndex
+        }
     },
     render: function () {
-        if(this.songs === undefined) {return}
         const htmls = this.songs.map((songs, index) => {
             return `
                 <div class="song ${index === this.currentIndex ? 'active' : ''}" data-index="${index}">
@@ -170,7 +201,7 @@ const app = {
             }
         }
 
-        // change volume icon
+        // click volume icon
         volumeIcon.onclick = function () {
             _this.isMute = !_this.isMute
             volumeIcon.classList.toggle('mute', _this.isMute)
@@ -179,8 +210,6 @@ const app = {
                 audio.volume = 0
                 volumeBar.value = 0
                 volume.value = 0
-                _this.currentVolume = 0
-                _this.setConfig('currentVolume', _this.currentVolume)
             } else {
                 audio.volume = _this.currentVolume
                 volumeBar.value = _this.currentVolume * 100
@@ -321,7 +350,6 @@ const app = {
         heading.textContent = this.currentSong.name
         cdThumb.style.backgroundImage = `url('${this.currentSong.image}')`
         audio.src = this.currentSong.path
-
     },
     nextSong: function () {
         this.currentIndex++
@@ -380,14 +408,12 @@ const app = {
         this.render()
 
         // hiển thiện trạng thái của repeat và random khi load lại trang
-        
         repeatBtn.classList.toggle('active', this.isRepeat)
         randomBtn.classList.toggle('active', this.isRandom)  
         volumeIcon.classList.toggle('mute', this.isMute)  
         audio.volume = this.currentVolume
         volumeBar.value = this.currentVolume * 100
         volume.value = this.currentVolume * 100
-        audio.play()
     },
 }
 app.start()
