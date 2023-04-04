@@ -95,6 +95,7 @@ const app = {
         localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config))
     },
     loadConfig: function() {
+        this.currentIndex = 0
         this.isRandom = this.config.isRandom
         this.isRepeat = this.config.isRepeat
         this.isMute = this.config.isMute
@@ -344,7 +345,7 @@ const app = {
         }
         this.loadCurrentSong()
     },
-    
+
     scrollToActiveSong: function () {
         setTimeout(() => {
             if (this.currentIndex <= 3) {
