@@ -13,15 +13,20 @@ const prevBtn = $('.btn-prev')
 const randomBtn = $('.btn-random')
 const repeatBtn = $('.btn-repeat')
 const playList = $('.playlist')
+const volume = $('.control_volume-slider input')
+const volumeBar = $('.control_volume-slider progress')
+const volumeIcon = $('.control_volume-icon')
 
 const PLAYER_STORAGE_KEY = 'USER_PLAYER'
 
 const app = {
     currentIndex: 0,
+    currentVolume: 100,
     isRandom: false,
     isPlaying: false,
     isRepeat: false,
     isSongactive: false,
+    isMute: false,
     config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
     songs: [
         {
@@ -92,6 +97,9 @@ const app = {
     loadConfig: function() {
         this.isRandom = this.config.isRandom
         this.isRepeat = this.config.isRepeat
+        this.isMute = this.config.isMute
+        this.currentVolume = this.config.currentVolume
+        this.currentIndex = this.config.currentIndex
     },
     render: function () {
         const htmls = this.songs.map((songs, index) => {
@@ -123,6 +131,60 @@ const app = {
     handleEvent: function () {
         const _this = this
         const cdWidth = cd.offsetWidth
+
+        // volume update
+        volume.onmousemove = function () {
+            var percentVolume = volumeBar.value / 100
+            _this.currentVolume = percentVolume
+            audio.volume = percentVolume
+            _this.setConfig('currentVolume', _this.currentVolume)
+            if (audio.volume == 0) {
+                _this.isMute = false
+                _this.isMute = !_this.isMute
+                volumeIcon.classList.toggle('mute', _this.isMute)
+            } else {
+                _this.isMute = true
+                _this.isMute = !_this.isMute
+                volumeIcon.classList.toggle('mute', _this.isMute)
+            }
+        }
+
+        // volume change
+        volume.onmouseup = function () {
+            var percentVolume = volumeBar.value / 100
+            _this.currentVolume = percentVolume
+            audio.volume = percentVolume
+            _this.setConfig('currentVolume', _this.currentVolume)
+            if (audio.volume == 0) {
+                _this.isMute = false
+                _this.isMute = !_this.isMute
+                _this.setConfig('isMute', _this.isMute)
+                volumeIcon.classList.toggle('mute', _this.isMute)
+            } else {
+                _this.isMute = true
+                _this.isMute = !_this.isMute
+                _this.setConfig('isMute', _this.isMute)
+                volumeIcon.classList.toggle('mute', _this.isMute)
+            }
+        }
+
+        // change volume icon
+        volumeIcon.onclick = function () {
+            _this.isMute = !_this.isMute
+            volumeIcon.classList.toggle('mute', _this.isMute)
+            _this.setConfig('isMute', _this.isMute)
+            if (_this.isMute) {
+                audio.volume = 0
+                volumeBar.value = 0
+                volume.value = 0
+                _this.currentVolume = 0
+                _this.setConfig('currentVolume', _this.currentVolume)
+            } else {
+                audio.volume = _this.currentVolume
+                volumeBar.value = _this.currentVolume * 100
+                volume.value = _this.currentVolume * 100
+            }
+        }
 
         // Xử lý CD quay
         const cdThumbAnimate = cdThumb.animate([
@@ -189,6 +251,7 @@ const app = {
             audio.play()
             _this.render()
             _this.scrollToActiveSong()
+            _this.setConfig('currentIndex', _this.currentIndex)
         }
 
         // Khi previous song
@@ -201,6 +264,7 @@ const app = {
             audio.play()
             _this.render()
             _this.scrollToActiveSong()
+            _this.setConfig('currentIndex', _this.currentIndex)
         }
         
         // Xử lý bật/tắt Random song
@@ -236,6 +300,7 @@ const app = {
                     _this.currentIndex = Number(songNode.dataset.index)
                     _this.loadCurrentSong()
                     _this.render()
+                    _this.setConfig('currentIndex', _this.currentIndex)
                     audio.play()
                 }
 
@@ -244,6 +309,10 @@ const app = {
 
                 }
             }
+        }
+
+        volume.oninput = function () {
+            volumeBar.value = volume.value;
         }
     },
     loadCurrentSong: function () {
@@ -275,6 +344,7 @@ const app = {
         }
         this.loadCurrentSong()
     },
+    
     scrollToActiveSong: function () {
         setTimeout(() => {
             if (this.currentIndex <= 3) {
@@ -308,8 +378,14 @@ const app = {
         this.render()
 
         // hiển thiện trạng thái của repeat và random khi load lại trang
+        
         repeatBtn.classList.toggle('active', this.isRepeat)
-        randomBtn.classList.toggle('active', this.isRandom)
+        randomBtn.classList.toggle('active', this.isRandom)  
+        volumeIcon.classList.toggle('mute', this.isMute)  
+        audio.volume = this.currentVolume
+        volumeBar.value = this.currentVolume * 100
+        volume.value = this.currentVolume * 100
+        audio.play()
     },
 }
 app.start()

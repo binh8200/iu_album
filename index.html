@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IU album</title>
     <link rel="icon" type="image/x-icon" href="./assets/img/main.jfif">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
-        integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w=="
-        crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./assets/css/style.css">
@@ -54,6 +54,18 @@
             <input id="progress" class="progress" type="range" value="0" step="1" min="0" max="100">
 
             <audio id="audio" src=""></audio>
+
+            <div class="control_volume ">
+                <div class="control_volume-icon">
+                    <i class="fa-sharp fa-solid fa-volume-off volume_mute"></i>
+                    <i class="fa-sharp fa-solid fa-volume-high volume_active"></i>
+                </div>
+
+                <div class="control_volume-slider">
+                    <input type="range" min="0" max="100" value="50" class="volume">
+                    <progress min="0" max="100" value="50"></progress>
+                </div>
+            </div>
         </div>
 
         <!-- Playlist -->
