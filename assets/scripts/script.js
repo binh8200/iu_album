@@ -103,6 +103,7 @@ const app = {
         this.currentIndex = this.config.currentIndex
     },
     render: function () {
+        if(this.songs === undefined) {return}
         const htmls = this.songs.map((songs, index) => {
             return `
                 <div class="song ${index === this.currentIndex ? 'active' : ''}" data-index="${index}">
